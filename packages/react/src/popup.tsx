@@ -110,8 +110,12 @@ function followTree() {
       }
     })
   const track = (next: unknown) => {
-    if (next instanceof HTMLElement && !els.includes(next)) {
-      els = [...els.filter((el) => el.isConnected), next]
+    // A node type check, since `instanceof` fails for another window's elements.
+    if (
+      (next as Node | null)?.nodeType === 1 &&
+      !els.includes(next as HTMLElement)
+    ) {
+      els = [...els.filter((el) => el.isConnected), next as HTMLElement]
     }
   }
   return {

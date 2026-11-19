@@ -41,6 +41,21 @@ test("a menu opened with Enter focuses its first item and gives focus back to it
   await expect(trigger).toBeFocused()
 })
 
+test("a menu opened with a click moves focus into it while the opener draws no frames", async ({
+  page,
+}) => {
+  const view = await popOut(page)
+  await page.evaluate(() => {
+    window.requestAnimationFrame = () => 0
+  })
+  await view.getByRole("button", { name: "Menu" }).click()
+  await expect
+    .poll(() =>
+      view.evaluate(() => !!document.activeElement?.closest('[role="menu"]'))
+    )
+    .toBe(true)
+})
+
 test("a modal dialog keeps Tab inside and gives focus back to its trigger", async ({
   page,
 }) => {

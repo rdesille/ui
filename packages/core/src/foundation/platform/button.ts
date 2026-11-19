@@ -104,18 +104,20 @@ function opensElsewhere(event: Event | undefined, el: HTMLElement | undefined) {
   if (
     !event ||
     !el ||
-    !(event instanceof MouseEvent) ||
+    // A property check, since `instanceof` fails for events of another window.
+    !("button" in event) ||
     !el.matches("a[href]")
   ) {
     return false
   }
+  const press = event as MouseEvent
   const target = el.getAttribute("target")
   return (
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey ||
-    event.button !== 0 ||
+    press.metaKey ||
+    press.ctrlKey ||
+    press.shiftKey ||
+    press.altKey ||
+    press.button !== 0 ||
     el.hasAttribute("download") ||
     (!!target && target !== "_self")
   )

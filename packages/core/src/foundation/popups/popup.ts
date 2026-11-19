@@ -1021,7 +1021,8 @@ function createPopupLayer<
     }
     if (openedOnPress) {
       // The pointer can reach an item before the frame, which focuses it.
-      requestAnimationFrame(() => {
+      const view = shown?.el.ownerDocument.defaultView ?? window
+      view.requestAnimationFrame(() => {
         const active = currentFocus()
         if (!shown || !active || !composedContains(shown.el, active)) {
           run()

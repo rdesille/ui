@@ -1,3 +1,5 @@
+import { isInstance } from "./env"
+
 // Whether a press landed on an element's scrollbar rather than its content.
 // Coordinates are relative to the element's border box.
 function onScrollbar(
@@ -29,7 +31,7 @@ function onScrollbar(
 }
 
 function pressedScrollbar(event: PointerEvent, target: Node) {
-  if (!(target instanceof Element)) {
+  if (!isInstance(target, "Element")) {
     return false
   }
   const doc = target.ownerDocument

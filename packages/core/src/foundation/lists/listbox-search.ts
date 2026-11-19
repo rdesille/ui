@@ -4,6 +4,7 @@
 // whether opening moves real focus into the list for touch screen readers,
 // which ignore aria-activedescendant.
 import { announce } from "../platform/announce"
+import { isInstance } from "../platform/env"
 import { sourceOf } from "../kernel/modality"
 import { trusted } from "../kernel/trusted"
 import { type ListFilter } from "./listbox"
@@ -253,8 +254,8 @@ function createLoadMore({
   // don't bubble, so one listener in the capture phase hears every list.
   function bind(el: HTMLElement) {
     const onScroll = (event: Event) => {
-      const target = event.target as HTMLElement
-      if (!(target instanceof HTMLElement)) {
+      const target = event.target
+      if (!isInstance(target, "HTMLElement")) {
         return
       }
       // Within the height of a row or so of the end.
