@@ -28,6 +28,13 @@ const content = `
         <ui-dialog-close><button>Close</button></ui-dialog-close>
       </ui-dialog-content>
     </ui-dialog>
+    <ui-drawer>
+      <ui-drawer-trigger><button>Drawer</button></ui-drawer-trigger>
+      <ui-drawer-content class="dialog">
+        <ui-drawer-title>Drag me</ui-drawer-title>
+        <ui-drawer-close><button>Close drawer</button></ui-drawer-close>
+      </ui-drawer-content>
+    </ui-drawer>
     <ui-popover class="edge">
       <ui-popover-trigger><button>Edge popover</button></ui-popover-trigger>
       <ui-popover-content class="popup" side="bottom">Flips above</ui-popover-content>
@@ -40,6 +47,7 @@ async function mount(root: HTMLElement) {
   await import("@ui-sdk/web/popover")
   await import("@ui-sdk/web/menu")
   await import("@ui-sdk/web/dialog")
+  await import("@ui-sdk/web/drawer")
   root.querySelector("#pop")!.addEventListener("click", () => {
     const view = window.open("", "", "popup,width=480,height=360")!
     const style = view.document.createElement("style")

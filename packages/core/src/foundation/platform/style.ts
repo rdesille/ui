@@ -17,24 +17,32 @@ function setStyle(el: HTMLElement, name: string, value: string) {
   }
 }
 
-const registered = new Set<string>()
+const registered = new WeakMap<object, Set<string>>()
 
 // Registers custom properties that don't inherit, so one written on every
 // frame restyles only the element it's on, not everything inside it. The
 // registration covers the whole page and can't be undone, so a page that
 // needs a name to inherit registers it first, and its registration stands
 // (an `@property` rule doesn't: a registration in script wins).
-function registerUninherited(names: readonly string[]) {
-  if (typeof CSS === "undefined" || !CSS.registerProperty) {
+function registerUninherited(
+  names: readonly string[],
+  view: { CSS?: typeof CSS } | null = globalThis
+) {
+  const css = view?.CSS
+  if (!view || !css?.registerProperty) {
     return
   }
+  let done = registered.get(view)
+  if (!done) {
+    registered.set(view, (done = new Set()))
+  }
   for (const name of names) {
-    if (registered.has(name)) {
+    if (done.has(name)) {
       continue
     }
-    registered.add(name)
+    done.add(name)
     try {
-      CSS.registerProperty({ name, syntax: "*", inherits: false })
+      css.registerProperty({ name, syntax: "*", inherits: false })
     } catch {
       // The page registered it first, and its registration stands.
     }

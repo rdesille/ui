@@ -5,6 +5,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@ui-sdk/react/dialog"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@ui-sdk/react/drawer"
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@ui-sdk/react/menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@ui-sdk/react/popover"
 import * as React from "react"
@@ -42,6 +49,13 @@ function Content() {
           <DialogClose>Close</DialogClose>
         </DialogContent>
       </Dialog>
+      <Drawer>
+        <DrawerTrigger>Drawer</DrawerTrigger>
+        <DrawerContent className="dialog">
+          <DrawerTitle>Drag me</DrawerTitle>
+          <DrawerClose>Close drawer</DrawerClose>
+        </DrawerContent>
+      </Drawer>
       <Popover>
         <PopoverTrigger className="edge">Edge popover</PopoverTrigger>
         <PopoverContent className="popup" side="bottom">

@@ -30,7 +30,6 @@ Last reviewed: PRs 86 to 92 (2026-10-30, the audit fixes), 158 and 159 (2026-11-
 
 ## Known and open (don't report again, check whether fixed)
 
-- **Popups in another window, still open** (seen in the popups-in-another-window review): a Drawer or sheet there (`sheet*.ts` use `instanceof` and the global `requestAnimationFrame`), `createInlineEdit`'s origin (reads the global `document.activeElement`), and `registerUninherited`, which registers the popup variables in the opener's window only.
 - `bindScrollPicker` rebinds on every render when a ref callback isn't stable, which ends a drag in progress. The docs bind in `useLayoutEffect` with `useEffectEvent`; a ref callback needs `useCallback`.
 - **`InputClear`, and Command items and group labels, are missing from server HTML** and appear only after mount (seen in PR 321's review, older than it).
 - **The `hold-repeat` example drops focus to `<body>` at a bound** (seen in the bindRepeat review, older than it): it sets native `disabled` on the focused button. `aria-disabled` with `bindRepeat`'s `disabled` would keep focus.

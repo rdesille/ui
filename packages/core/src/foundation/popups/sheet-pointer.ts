@@ -19,6 +19,7 @@ import { nearestIndex } from "../motion/projection"
 import { settleTime, solveSpring, springLinearEasing } from "../motion/spring"
 import { createVelocityTracker } from "../motion/velocity"
 import { on } from "../kernel/events"
+import { isInstance } from "../platform/env"
 import { isDragPress, swallowNextClick } from "../drag-and-drop/pointer"
 import {
   axisPoint,
@@ -317,7 +318,9 @@ function createPointerDriver(options: SheetDriverOptions) {
   }
 
   function isIgnored(target: EventTarget | null) {
-    return target instanceof Element && target.closest(ignoredTargets) !== null
+    return (
+      isInstance(target, "Element") && target.closest(ignoredTargets) !== null
+    )
   }
 
   function scroll(target: EventTarget | null) {
@@ -464,7 +467,7 @@ function createPointerDriver(options: SheetDriverOptions) {
     if (
       !options.owns(target) ||
       isIgnored(target) ||
-      !(target instanceof Element) ||
+      !isInstance(target, "Element") ||
       !options.canMouseDrag(target)
     ) {
       return

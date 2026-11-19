@@ -25,6 +25,7 @@ type DomTypes = {
   HTMLIFrameElement: HTMLIFrameElement
   HTMLInputElement: HTMLInputElement
   HTMLSlotElement: HTMLSlotElement
+  HTMLTextAreaElement: HTMLTextAreaElement
   ShadowRoot: ShadowRoot
 }
 

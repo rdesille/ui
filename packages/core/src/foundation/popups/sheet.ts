@@ -20,7 +20,7 @@ import {
 import { on } from "../kernel/events"
 import type { Layer } from "../platform/layers"
 import { trackKeyboard } from "../platform/keyboard"
-import { isIOS } from "../platform/env"
+import { isInstance, isIOS } from "../platform/env"
 import {
   isVertical,
   resolveSide,
@@ -177,12 +177,13 @@ function parentSheet(layer: Layer) {
 }
 
 function sheetAt(target: EventTarget | null) {
-  for (let node = target instanceof Element ? target : null; node;) {
+  for (let node = isInstance(target, "Element") ? target : null; node;) {
     if (sheets.has(node)) {
       return node
     }
     const root = node.getRootNode()
-    node = node.parentElement ?? (root instanceof ShadowRoot ? root.host : null)
+    node =
+      node.parentElement ?? (isInstance(root, "ShadowRoot") ? root.host : null)
   }
   return null
 }
@@ -474,8 +475,8 @@ function attachSheet(el: HTMLElement, input: SheetOptions) {
   function focusWithoutScrolling(event: TouchEvent) {
     const target = event.target
     if (!(
-      target instanceof HTMLInputElement ||
-      target instanceof HTMLTextAreaElement
+      isInstance(target, "HTMLInputElement") ||
+      isInstance(target, "HTMLTextAreaElement")
     )) {
       return
     }
@@ -503,7 +504,7 @@ function attachSheet(el: HTMLElement, input: SheetOptions) {
   function revealFocused() {
     const field = doc.activeElement
     if (
-      !(field instanceof HTMLElement) ||
+      !isInstance(field, "HTMLElement") ||
       !el.contains(field) ||
       field === el
     ) {

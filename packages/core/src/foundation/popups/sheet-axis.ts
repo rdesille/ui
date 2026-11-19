@@ -1,7 +1,7 @@
 // A sheet moves along one axis, toward or away from the edge it's attached
 // to. The machine only knows extents and a finger position that grows toward
 // that edge; these helpers translate between it and the page for each side.
-import { isRTL } from "../platform/env"
+import { isInstance, isRTL } from "../platform/env"
 import { physicalSide, type PhysicalSide, type Side } from "../platform/sides"
 
 /**
@@ -72,7 +72,7 @@ function scrollAreaAt(
   side: PhysicalSide
 ) {
   const view = sheet.ownerDocument.defaultView
-  if (!view || !(target instanceof Element) || !sheet.contains(target)) {
+  if (!view || !isInstance(target, "Element") || !sheet.contains(target)) {
     return null
   }
   const vertical = isVertical(side)
@@ -84,7 +84,7 @@ function scrollAreaAt(
     const scrollable = vertical
       ? node.scrollHeight > node.clientHeight + 1
       : node.scrollWidth > node.clientWidth + 1
-    if (!scrollable || !(node instanceof HTMLElement)) {
+    if (!scrollable || !isInstance(node, "HTMLElement")) {
       continue
     }
     const overflow = vertical

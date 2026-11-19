@@ -453,7 +453,7 @@ function position(
     alignOffset: Number(options.alignOffset ?? 0),
     collisionPadding: Number(options.collisionPadding ?? 8),
   })
-  registerUninherited(roomVariables)
+  registerUninherited(roomVariables, el.ownerDocument.defaultView)
   Object.assign(el.style, {
     position: "fixed",
     inset: "auto",

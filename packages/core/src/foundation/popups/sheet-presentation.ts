@@ -6,6 +6,7 @@
 // backdrop part. `createPresentation` loads this module when it's needed.
 import type { SnapPoint } from "../motion/snap-points"
 import { on } from "../kernel/events"
+import { isInstance } from "../platform/env"
 import { setStyle, writeStyle } from "../platform/style"
 import type { Layer } from "../platform/layers"
 import type { Popup } from "./popup"
@@ -38,7 +39,7 @@ function isolate(container: Element, keep: (Element | undefined)[]) {
       }
       if (keep.some((el) => el && child.contains(el))) {
         walk(child)
-      } else if (child instanceof HTMLElement) {
+      } else if (isInstance(child, "HTMLElement")) {
         restores.push(setStyle(child, "display", "none"))
       }
     }
@@ -107,6 +108,7 @@ function showSheet(
   config: SheetConfig,
   layer: Layer
 ) {
+  const view = el.ownerDocument.defaultView ?? window
   let rest: SnapPoint | null = null
   const stackedOn = parentSheet(layer)
   const dimsHost = !config.backdrop?.()
@@ -122,7 +124,7 @@ function showSheet(
     onSnap: (point) => (rest = point),
     onDismiss(event) {
       popup.requestClose("swipe", event)
-      requestAnimationFrame(() => {
+      view.requestAnimationFrame(() => {
         const point = rest ?? sheet.snapPoints()[0]?.value
         if (layer.active() && point !== undefined) {
           sheet.snapTo(point, "imperative")
@@ -143,7 +145,7 @@ function showSheet(
     }
   })
   const color = dimsHost
-    ? getComputedStyle(el).getPropertyValue("--sheet-backdrop")
+    ? view.getComputedStyle(el).getPropertyValue("--sheet-backdrop")
     : "transparent"
   if (color) {
     host.style.setProperty("--sheet-backdrop", color)

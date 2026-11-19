@@ -32,7 +32,7 @@ Last reviewed: PRs 86 to 92 (2026-10-30, the audit fixes), 158 and 159 (2026-11-
 
 ## Known and open (don't report again, check whether fixed)
 
-- **Popups in another window, still open** (seen in the popups-in-another-window review): a Drawer or sheet there (`sheet*.ts` use `instanceof` and the global `requestAnimationFrame`), and a popup moved to another document while open, whose positioning keeps the first document's frames and listeners.
+- **A popup moved to another document while open** keeps positioning with the first document's frames and listeners (seen in the popups-in-another-window review). Part of the open-popup-moved entry below: the move drops it from the top layer anyway.
 - **An author's `aria-controls` on an open Collapsible with no panel part is erased.** The trigger guesses `-panel` before bind and the guess replaces it; settling removes the attribute without putting the author's back. Restoring a found reference on removal changes a core rule, so it waits.
 - An option named after a native element member gets no reflecting property, and jsdom-only tests don't show it (Listbox's picker option was renamed `keepInView` for this). A manifest check against browser element members would catch it.
 - **Before the elements upgrade, closed popup content and inactive panels show inline**, then collapse. Writing `hidden` on content parts avoids it; the popover and menu `basic` examples don't (PR 321).

@@ -5,6 +5,7 @@
 // started either way.
 import { focusables } from "../focus/tabbable"
 import { isComposing } from "../kernel/events"
+import { isInstance } from "../platform/env"
 import type { PrimitiveContext } from "../kernel/primitive-types"
 
 /**
@@ -112,9 +113,11 @@ function createInlineEdit<State extends object>(
       if (options.disabled?.(id) || editing() === id) {
         return false
       }
-      const active =
-        typeof document === "undefined" ? null : document.activeElement
-      origin = active instanceof HTMLElement ? active : undefined
+      // The event's document, since the list may render in another window.
+      const target = details.event?.target as Node | null | undefined
+      const doc = target?.ownerDocument ?? globalThis.document
+      const active = doc?.activeElement
+      origin = isInstance(active, "HTMLElement") ? active : undefined
       start =
         details.text === undefined
           ? { text: options.value(id), typed: false }
@@ -176,7 +179,7 @@ function createInlineEdit<State extends object>(
       }
       if (
         event.key === "Enter" &&
-        !(event.target instanceof HTMLTextAreaElement && event.shiftKey)
+        !(isInstance(event.target, "HTMLTextAreaElement") && event.shiftKey)
       ) {
         event.preventDefault()
         return api.end("enter-key", event)

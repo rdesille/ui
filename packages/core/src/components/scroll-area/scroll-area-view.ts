@@ -236,7 +236,7 @@ function createScrollView(store: Store<ScrollAreaModel>) {
       set(name.atStart, edges.atStart)
       set(name.atEnd, edges.atEnd)
       if (root) {
-        registerUninherited(frameVariables)
+        registerUninherited(frameVariables, root.ownerDocument.defaultView)
         write(root, name.before, edges.before)
         write(root, name.after, edges.after)
         write(root, name.progress, edges.progress, "")
