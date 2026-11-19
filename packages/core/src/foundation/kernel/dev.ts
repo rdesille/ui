@@ -454,15 +454,20 @@ function checkEvent(
     return
   }
   // Event constructors looked up by name, so engines without one, like
-  // SubmitEvent in older browsers, skip it instead of throwing.
-  const constructors = window as unknown as Record<
-    string,
-    (new () => Event) | undefined
-  >
-  const matches = allowed.some((name) => {
-    const constructor = constructors[name]
-    return !!constructor && event instanceof constructor
-  })
+  // SubmitEvent in older browsers, skip it instead of throwing. An event fired
+  // in another window, like one the app opened, has that window's classes.
+  const views = [
+    window,
+    (event.target as Node | null)?.ownerDocument?.defaultView,
+  ]
+  const matches = allowed.some((name) =>
+    views.some((view) => {
+      const constructor = (
+        view as unknown as Record<string, (new () => Event) | undefined>
+      )?.[name]
+      return !!constructor && event instanceof constructor
+    })
+  )
   if (matches) {
     return
   }

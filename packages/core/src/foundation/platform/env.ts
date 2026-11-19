@@ -28,15 +28,25 @@ type DomTypes = {
   ShadowRoot: ShadowRoot
 }
 
-// `instanceof HTMLElement` is false for an element of another window, like one
-// an app renders into a window it opened, so each node checks its own window's.
+function instanceIn(
+  scope: Partial<typeof globalThis> | null | undefined,
+  value: unknown,
+  type: keyof DomTypes
+) {
+  const constructor = scope?.[type]
+  return !!constructor && value instanceof constructor
+}
+
+// An element has the classes of the window that made it, which can differ from
+// the one it's in, like one an app renders or moves into a window it opened.
 function isInstance<K extends keyof DomTypes>(
   value: unknown,
   type: K
 ): value is DomTypes[K] {
-  const view = (value as Node | null)?.ownerDocument?.defaultView
-  const constructor = (view ?? (globalThis as Partial<typeof globalThis>))[type]
-  return !!constructor && value instanceof constructor
+  return (
+    instanceIn(globalThis, value, type) ||
+    instanceIn((value as Node | null)?.ownerDocument?.defaultView, value, type)
+  )
 }
 
 export { isBrowser, isInstance, isIOS, isRTL }
