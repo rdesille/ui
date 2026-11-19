@@ -14,13 +14,11 @@ function supportsAnchoring() {
   return supported
 }
 
-const fillsLayoutViewport = (viewport: {
-  x: number
-  y: number
-  width: number
-  height: number
-}) => {
-  const root = document.documentElement
+const fillsLayoutViewport = (
+  viewport: { x: number; y: number; width: number; height: number },
+  doc: Document
+) => {
+  const root = doc.documentElement
   return (
     !viewport.x &&
     !viewport.y &&
@@ -43,7 +41,7 @@ function anchorable(
     !supportsAnchoring() ||
     anchor.getRootNode() !== el.getRootNode() ||
     !(shown.width || shown.height) ||
-    !fillsLayoutViewport(viewport)
+    !fillsLayoutViewport(viewport, el.ownerDocument)
   ) {
     return false
   }

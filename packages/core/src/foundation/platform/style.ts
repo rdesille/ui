@@ -211,13 +211,13 @@ function ahead(work: () => void) {
  * Runs work that restyles the whole page once the current frame has painted,
  * so what the interaction shows comes first. Returns a cancel.
  */
-function afterPaint(work: () => void) {
+function afterPaint(work: () => void, view: Window = window) {
   let timer: ReturnType<typeof setTimeout> | undefined
-  const frame = requestAnimationFrame(() => {
+  const frame = view.requestAnimationFrame(() => {
     timer = setTimeout(work)
   })
   return () => {
-    cancelAnimationFrame(frame)
+    view.cancelAnimationFrame(frame)
     clearTimeout(timer)
   }
 }

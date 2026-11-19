@@ -1,5 +1,6 @@
 import { isDisabled, watchFormDisabled } from "../../foundation/forms/form"
 import { hiddenAttrs } from "../../foundation/motion/panel"
+import { isInstance } from "../../foundation/platform/env"
 import { checkedAttrs, idPart, openAttrs } from "../../foundation/kernel/attrs"
 import { createController } from "../../foundation/kernel/controller"
 import type {
@@ -403,7 +404,7 @@ const flag = (on: boolean) => (on ? "" : undefined)
 // Items nest, so a key or press on a child item bubbles through its parents. Only its own item acts on it.
 const ownEvent = (el: HTMLElement | undefined, event?: Event) =>
   !el ||
-  !(event?.target instanceof Element) ||
+  !isInstance(event?.target, "Element") ||
   event.target.closest('[role="treeitem"]') === el
 
 // Data attributes every part of an item writes.

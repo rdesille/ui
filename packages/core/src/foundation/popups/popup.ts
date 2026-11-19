@@ -1269,7 +1269,7 @@ function createPopupLayer<
           focusPending = true
           initialFocus(config.initialFocus)
         }
-      })
+      }, el.ownerDocument.defaultView ?? window)
     }
     remodal = () => {
       const next = options.modal()

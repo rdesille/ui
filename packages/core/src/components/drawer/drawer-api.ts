@@ -293,7 +293,8 @@ function drawerApiBody(
       hide({ reason: "swipe", event })
       // A close the app refused, or a controlled one it hasn't confirmed by
       // the next frame, springs back.
-      requestAnimationFrame(() => {
+      const view = sheet?.element.ownerDocument.defaultView ?? window
+      view.requestAnimationFrame(() => {
         const snap = store.get().snapPoint
         if (store.get().open && snap !== null) {
           sheet?.snapTo(snap, "imperative")

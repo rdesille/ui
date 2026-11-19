@@ -1,7 +1,7 @@
 // Rows move like Tree's, on `createRovingFocus` and a tree collection. Cells
 // are found in the row's DOM, so a row holds any columns: Right enters them,
 // Left leaves them, Up and Down keep the column, and only the focused one is a tab stop.
-import { isRTL } from "../../foundation/platform/env"
+import { isInstance, isRTL } from "../../foundation/platform/env"
 import { createRovingFocus } from "../../foundation/focus/roving-focus"
 import {
   createTypeahead,
@@ -293,7 +293,7 @@ function waterfallApiBody(
     if (
       event.defaultPrevented ||
       event.altKey ||
-      !(target instanceof HTMLElement) ||
+      !isInstance(target, "HTMLElement") ||
       target.closest('[role="row"]') !== row
     ) {
       return
@@ -393,7 +393,7 @@ function waterfallApiBody(
   function focusin(event: FocusEvent, row: HTMLElement, key: string) {
     const target = event.target
     if (
-      !(target instanceof HTMLElement) ||
+      !isInstance(target, "HTMLElement") ||
       target.closest('[role="row"]') !== row
     ) {
       return

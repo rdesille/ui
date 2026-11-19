@@ -4,6 +4,7 @@
 import type { ChangeReason } from "./details"
 import { callbackName, defaultName } from "./option-names"
 import { ariaProblems, knownRoles, unmetNeeds } from "./roles"
+import { isInstance } from "../platform/env"
 
 /**
  * What core reports to a devtools hook in development. Internal until the devtools ship.
@@ -302,7 +303,7 @@ function checkFocus(
   if (
     typeof focus !== "string" ||
     typeof Element === "undefined" ||
-    !(el instanceof Element)
+    !isInstance(el, "Element")
   ) {
     return
   }
@@ -458,6 +459,7 @@ function checkEvent(
   // in another window, like one the app opened, has that window's classes.
   const views = [
     window,
+    (event as UIEvent).view,
     (event.target as Node | null)?.ownerDocument?.defaultView,
   ]
   const matches = allowed.some((name) =>

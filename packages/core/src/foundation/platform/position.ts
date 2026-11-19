@@ -535,7 +535,8 @@ function position(
     const viewport = visibleViewport(el.ownerDocument)
     if (
       anchoring &&
-      (node !== anchoring.anchor || !fillsLayoutViewport(viewport))
+      (node !== anchoring.anchor ||
+        !fillsLayoutViewport(viewport, el.ownerDocument))
     ) {
       unanchor()
     }

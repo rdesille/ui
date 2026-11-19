@@ -179,3 +179,37 @@ test("inline editing started in the window gives focus back to where it started"
   })
   expect(focusedBack).toBe(true)
 })
+
+test("a roving group asked to focus an item before any renders focuses it once it does", async ({
+  page,
+}) => {
+  await page.evaluate(async () => {
+    const { loadCoreModule } = window as unknown as {
+      loadCoreModule: (name: string) => Promise<unknown>
+    }
+    const { createStore } = (await loadCoreModule("store")) as {
+      createStore: (state: object, live: string[]) => unknown
+    }
+    const { createRovingFocus } = (await loadCoreModule("roving-focus")) as {
+      createRovingFocus: (
+        context: { store: unknown; onDestroy: (cleanup: () => void) => void },
+        options: { slot: string; key: string }
+      ) => {
+        focus: (key: string) => void
+        bind: (el: HTMLElement, part: { key: string; props: object }) => void
+      }
+    }
+    const roving = createRovingFocus(
+      { store: createStore({ stop: null }, []), onDestroy: () => {} },
+      { slot: "item", key: "stop" }
+    )
+    const before = document.querySelector("button")!
+    before.focus()
+    roving.focus("a")
+    const item = document.createElement("button")
+    item.textContent = "Item"
+    document.body.append(item)
+    roving.bind(item, { key: "a", props: {} })
+  })
+  await expect(page.getByRole("button", { name: "Item" })).toBeFocused()
+})

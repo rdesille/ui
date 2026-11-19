@@ -430,7 +430,8 @@ function createRovingFocus<State extends object, Props = any>(
         if (item && isFocusable(item.part) && focusOn(item.el)) {
           return
         }
-        const doc = (item ?? order.list()[0])?.el.ownerDocument
+        const doc =
+          (item ?? order.list()[0])?.el.ownerDocument ?? globalThis.document
         moveTo(itemKey, doc?.activeElement ?? null)
         return
       }

@@ -988,7 +988,7 @@ function menuApiBody(
       y: event.clientY,
       time: performance.now(),
     }
-    const off = on(window, "pointerup", (up) => {
+    const off = on(event.view ?? window, "pointerup", (up) => {
       off()
       // The window sees only the shadow host around a trigger in a shadow root.
       const target = up.composedPath()[0] as HTMLElement
