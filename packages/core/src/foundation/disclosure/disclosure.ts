@@ -66,7 +66,7 @@ function triggerKeydown(event: KeyboardEvent, el: HTMLElement | undefined) {
 
 // Safari doesn't focus buttons on click, so the next Tab would start from the page.
 function focusPressedTrigger(el: HTMLElement | undefined) {
-  if (el && typeof document !== "undefined" && document.activeElement !== el) {
+  if (el && el.ownerDocument.activeElement !== el) {
     el.focus({ preventScroll: true })
   }
 }

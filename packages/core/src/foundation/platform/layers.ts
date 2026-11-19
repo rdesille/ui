@@ -1,6 +1,7 @@
 import { dev, emit } from "#dev"
 import { isComposing, on } from "../kernel/events"
 import { composedContains, composedHops } from "./platform"
+import { isInstance } from "./env"
 import { pressedScrollbar } from "./scrollbar"
 
 // Every open popup is a layer. Layers nest: a submenu's layer has its menu's
@@ -82,7 +83,7 @@ function persistent() {
 function bindPersistentLayer(el: Element) {
   persistent().add(el)
   const releases = active().flatMap((layer) =>
-    layer.keep && el instanceof HTMLElement ? [layer.keep(el)] : []
+    layer.keep && isInstance(el, "HTMLElement") ? [layer.keep(el)] : []
   )
   const stopRaising = raiseAbovePopups(el.ownerDocument)
   return () => {
@@ -114,7 +115,7 @@ function raiseAbovePopups(doc: Document) {
       const opened = event.target
       if (
         (event as ToggleEvent).newState !== "open" ||
-        !(opened instanceof Element)
+        !isInstance(opened, "Element")
       ) {
         return
       }
@@ -122,7 +123,7 @@ function raiseAbovePopups(doc: Document) {
         return
       }
       for (const el of persistentLayers()) {
-        if (el instanceof HTMLElement) {
+        if (isInstance(el, "HTMLElement")) {
           showAgain(el)
         }
       }

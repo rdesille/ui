@@ -412,13 +412,13 @@ function createWriter(el: HTMLElement) {
   }
 }
 
-function visibleViewport() {
-  const visual = window.visualViewport
+function visibleViewport(doc: Document) {
+  const visual = doc.defaultView?.visualViewport
   return {
     x: visual?.offsetLeft ?? 0,
     y: visual?.offsetTop ?? 0,
-    width: visual?.width ?? document.documentElement.clientWidth,
-    height: visual?.height ?? document.documentElement.clientHeight,
+    width: visual?.width ?? doc.documentElement.clientWidth,
+    height: visual?.height ?? doc.documentElement.clientHeight,
   }
 }
 
@@ -532,7 +532,7 @@ function position(
       unwatchRoots = watchShadowRoots(around)
     }
     unwatched = !node && "getBoundingClientRect" in anchor
-    const viewport = visibleViewport()
+    const viewport = visibleViewport(el.ownerDocument)
     if (
       anchoring &&
       (node !== anchoring.anchor || !fillsLayoutViewport(viewport))
@@ -737,18 +737,20 @@ function position(
     return true
   }
 
+  // The popup's own window runs frames while this one is hidden.
+  const view = el.ownerDocument.defaultView ?? window
   let frame = 0
   let still = 0
   function loop() {
     frame = 0
     still = update() ? 0 : still + 1
     if (still < stillFrames || unwatched) {
-      frame = requestAnimationFrame(loop)
+      frame = view.requestAnimationFrame(loop)
     }
   }
   function wake() {
     still = 0
-    frame ||= requestAnimationFrame(loop)
+    frame ||= view.requestAnimationFrame(loop)
   }
   const unwatch = watchMoves(wake, el)
   // While asleep, a slow check catches what no event reports, like an anchor
@@ -758,7 +760,7 @@ function position(
   update()
   wake()
   const stop = () => {
-    cancelAnimationFrame(frame)
+    view.cancelAnimationFrame(frame)
     clearInterval(slow)
     unwatch()
     unwatchRoots()

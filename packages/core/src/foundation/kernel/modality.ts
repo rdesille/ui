@@ -1,7 +1,7 @@
 import { trusted } from "./trusted"
 
 let modality: "keyboard" | "pointer" = "pointer"
-let installed = false
+const installed = new WeakSet<Document>()
 // Whether `trackInput` has an install waiting on a microtask.
 let scheduled = false
 let restoring = false
@@ -66,20 +66,21 @@ function notePress(event: PointerEvent | TouchEvent) {
       : "mouse"
 }
 
-function install() {
-  if (installed || typeof document === "undefined") {
+function install(doc = globalThis.document) {
+  const view = doc?.defaultView
+  if (!view || installed.has(doc)) {
     return
   }
-  installed = true
-  document.addEventListener("keydown", noteKeydown, true)
-  document.addEventListener("keyup", noteKey, true)
-  document.addEventListener("pointerdown", notePress, true)
-  document.addEventListener("touchstart", notePress, {
+  installed.add(doc)
+  doc.addEventListener("keydown", noteKeydown, true)
+  doc.addEventListener("keyup", noteKey, true)
+  doc.addEventListener("pointerdown", notePress, true)
+  doc.addEventListener("touchstart", notePress, {
     capture: true,
     passive: true,
   })
-  window.addEventListener("blur", (event) => {
-    if (event.target === window) {
+  view.addEventListener("blur", (event) => {
+    if (event.target === view) {
       windowLeft = true
     }
   })
@@ -88,15 +89,18 @@ function install() {
 /**
  * Starts tracking input, so later changes can tell how they were caused. A
  * microtask later, before any key or pointer press can come, so a primitive
- * that calls it as it's made reads no `document` then, as on a server. Safe
- * to call often.
+ * that calls it as it's made reads no `document` then, as on a server. Pass
+ * the document of an element that renders in another window. Safe to call often.
  */
-function trackInput() {
-  if (installed || scheduled) {
+function trackInput(doc?: Document) {
+  if (doc) {
+    return install(doc)
+  }
+  if (scheduled) {
     return
   }
   scheduled = true
-  queueMicrotask(install)
+  queueMicrotask(() => install())
 }
 
 // A pointer with no size and no pressure is one assistive technology made up,

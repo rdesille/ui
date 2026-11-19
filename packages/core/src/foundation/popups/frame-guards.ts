@@ -1,5 +1,6 @@
 import { on } from "../kernel/events"
 import { tabbables } from "../focus/tabbable"
+import { isInstance } from "../platform/env"
 
 const hidden =
   "position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;outline:none"
@@ -28,7 +29,7 @@ function guardFrames(popup: HTMLElement, trapping: () => boolean) {
     if (
       guards.length ||
       !trapping() ||
-      !(active instanceof HTMLIFrameElement) ||
+      !isInstance(active, "HTMLIFrameElement") ||
       !popup.contains(active)
     ) {
       return

@@ -242,9 +242,10 @@ function autocompleteApiBody(
       },
       // Focus is in the field already, unless it left or a screen reader moved it into the list.
       close(_, close) {
+        const content = contentElement()
         const inList =
           store.get().focusInList &&
-          !!contentElement()?.contains(document.activeElement)
+          !!content?.contains(content.ownerDocument.activeElement)
         close()
         const input = inputElement()
         if (inList && input && !store.get().open) {

@@ -1,6 +1,6 @@
 import { on } from "../kernel/events"
 import { persistentLayers } from "../platform/layers"
-import { isIOS } from "../platform/env"
+import { isInstance, isIOS } from "../platform/env"
 import { setStyle, writeStyle } from "../platform/style"
 
 // The page-wide side effects of modal layers: the scroll lock and making the
@@ -222,7 +222,7 @@ function guardTouch(modal: HTMLElement) {
     doc,
     "touchstart",
     (event) => {
-      const target = event.target instanceof Element ? event.target : null
+      const target = isInstance(event.target, "Element") ? event.target : null
       owner = touchOwner({
         fingers: event.touches.length,
         zoomed: (view.visualViewport?.scale ?? 1) !== 1,
@@ -258,7 +258,7 @@ const liveRegions =
 
 function parentOf(node: Node) {
   const parent = node.parentNode
-  return parent instanceof ShadowRoot ? parent.host : parent
+  return isInstance(parent, "ShadowRoot") ? parent.host : parent
 }
 
 function applyInert(keep: Element[]) {
@@ -288,7 +288,7 @@ function applyInert(keep: Element[]) {
       for (const sibling of Array.from(
         (node.parentNode as ParentNode | null)?.children ?? []
       )) {
-        if (keepSet.has(sibling) || !(sibling instanceof HTMLElement)) {
+        if (keepSet.has(sibling) || !isInstance(sibling, "HTMLElement")) {
           continue
         }
         const count =

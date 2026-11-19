@@ -904,7 +904,7 @@ function menuApiBody(
     }
     if (
       store.get().highlighted !== entry.key ||
-      document.activeElement !== el
+      el.ownerDocument.activeElement !== el
     ) {
       highlight(entry.key)
     }
@@ -1096,7 +1096,7 @@ function menuApiBody(
       return
     }
     const list = entries.list()
-    const focused = entryOf(document.activeElement as HTMLElement)
+    const focused = entryOf(target.ownerDocument.activeElement as HTMLElement)
     const currentKey = focused?.key ?? store.get().highlighted
     const index = list.findIndex((entry) => entry.key === currentKey)
     const current = list[index]

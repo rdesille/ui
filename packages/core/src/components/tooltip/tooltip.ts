@@ -512,7 +512,7 @@ const tooltipPrimitive = /* @__PURE__ */ definePrimitive({
           const unbind = bindTrigger(store, key)
           adoptPlatform(store)
           // Focus that wakes it opens it only from the keyboard, which this tells from the start.
-          trackInput()
+          trackInput(el.ownerDocument)
           // The client knows the trigger's name now. A microtask lets hydration finish first.
           queueMicrotask(() => {
             if (store.get().trigger === key) {

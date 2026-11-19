@@ -276,10 +276,8 @@ function waterfallApiBody(
   )
 
   function press(key: string, el: HTMLElement | undefined, event?: Event) {
-    const active =
-      typeof document === "undefined" ? null : document.activeElement
     // A press on a cell focuses the cell; anywhere else in the row focuses the row.
-    if (el && !(active instanceof HTMLElement && el.contains(active))) {
+    if (el && !el.contains(el.ownerDocument.activeElement)) {
       el.focus({ preventScroll: true })
     }
     if (store.get().active !== key) {

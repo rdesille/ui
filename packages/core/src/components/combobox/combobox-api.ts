@@ -439,9 +439,10 @@ function comboboxApiBody(
       },
       // Unless it left, or a screen reader moved it into the list, which hands it back to the input.
       close(_, close) {
+        const content = contentElement()
         const inList =
           store.get().focusInList &&
-          !!contentElement()?.contains(document.activeElement)
+          !!content?.contains(content.ownerDocument.activeElement)
         close()
         const input = inputElement()
         if (inList && input && !store.get().open) {

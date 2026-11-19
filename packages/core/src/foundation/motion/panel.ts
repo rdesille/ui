@@ -165,7 +165,7 @@ function bindPanel(el: HTMLElement, panel: PanelBinding) {
   const closing = () => {
     halt()
     // Focus inside a closing panel would drop to the page. Its trigger is the closest place.
-    if (el.contains(document.activeElement)) {
+    if (el.contains(el.ownerDocument.activeElement)) {
       panel.trigger()?.focus({ preventScroll: true })
     }
     if (!panel.isExiting()) {

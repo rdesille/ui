@@ -384,7 +384,7 @@ function tabsApiBody(
   function reveal(value: string | null) {
     const list = element("list")
     const tab = value === null ? undefined : element("tab", value)
-    if (!list || !tab || tab.contains(document.activeElement)) {
+    if (!list || !tab || tab.contains(tab.ownerDocument.activeElement)) {
       return
     }
     if (
@@ -712,7 +712,7 @@ const tabsPrimitive = /* @__PURE__ */ definePrimitive({
           return
         }
         // Safari doesn't focus buttons on click, so arrow keys would go nowhere.
-        if (el && document.activeElement !== el) {
+        if (el && el.ownerDocument.activeElement !== el) {
           el.focus({ preventScroll: true })
         }
         api.select(key, api.internal.pressDetails(event))

@@ -399,7 +399,7 @@ const togglePrimitive = /* @__PURE__ */ definePrimitive({
           return event?.preventDefault()
         }
         // Safari doesn't focus buttons on click, so arrow keys in a group would go nowhere.
-        if (store.get().roving && el && document.activeElement !== el) {
+        if (store.get().roving && el && el.ownerDocument.activeElement !== el) {
           el.focus({ preventScroll: true })
         }
         api.toggle({ reason: "press", event })

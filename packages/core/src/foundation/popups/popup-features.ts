@@ -7,7 +7,7 @@ import { elements } from "../kernel/elements"
 import { whenKept } from "../kernel/keep"
 import { isFocusFromKeyboard } from "../kernel/modality"
 import { openAttrs } from "../kernel/attrs"
-import { isBrowser } from "../platform/env"
+import { isInstance } from "../platform/env"
 import {
   position,
   preparePosition,
@@ -162,7 +162,7 @@ function pressOpening(core: PopupCore) {
       if (typeof setting === "string") {
         return content.querySelector<HTMLElement>(setting) ?? content
       }
-      return isBrowser && setting instanceof HTMLElement ? setting : content
+      return isInstance(setting, "HTMLElement") ? setting : content
     },
     // Named by its title, else its trigger, and described by its description.
     // Until the content binds, as on the server, the trigger names it: a title
@@ -223,7 +223,7 @@ function closeOtherHovered(
     } else if (
       other !== core &&
       !popup?.contains(trigger ?? null) &&
-      !popup?.contains(document.activeElement)
+      !popup?.contains(popup.ownerDocument.activeElement)
     ) {
       other.control.hide({ reason: "trigger-hover", event, focus: false })
     }
@@ -244,7 +244,8 @@ function hoverOpening(core: PopupCore, group?: ReturnType<typeof warmGroup>) {
     closeDelay: () => options().closeDelay ?? preset.closeDelay ?? 0,
     close(event) {
       // Someone working inside the popup keeps it open.
-      if (core.popup.element()?.contains(document.activeElement)) {
+      const popup = core.popup.element()
+      if (popup?.contains(popup.ownerDocument.activeElement)) {
         return
       }
       core.control.hide({ reason: "trigger-hover", event, focus: false })
@@ -322,11 +323,12 @@ function focusOpening(core: PopupCore) {
         return
       }
       const open = () => {
+        const trigger = core.element(core.triggerSlot, key)
         // Focus may have moved on, or the trigger been disabled, while waiting.
         if (
           !options().disabled &&
           !core.triggerDisabled(key) &&
-          core.element(core.triggerSlot, key)?.contains(document.activeElement)
+          trigger?.contains(trigger.ownerDocument.activeElement)
         ) {
           core.control.show({
             by: "keyboard",

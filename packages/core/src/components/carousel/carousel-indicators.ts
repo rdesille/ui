@@ -100,7 +100,7 @@ function carouselIndicators(
       }
       const page = indicatorPage(store.get(), key, props)
       // Safari doesn't focus buttons on click, so arrow keys would go nowhere.
-      if (el && document.activeElement !== el) {
+      if (el && el.ownerDocument.activeElement !== el) {
         el.focus({ preventScroll: true })
       }
       if (page > 0) {

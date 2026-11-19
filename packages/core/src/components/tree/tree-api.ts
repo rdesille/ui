@@ -5,7 +5,7 @@
 // tree collection, built from `items` or from the items in the page.
 import { warn } from "#dev"
 import { announce } from "../../foundation/platform/announce"
-import { isRTL } from "../../foundation/platform/env"
+import { isInstance, isRTL } from "../../foundation/platform/env"
 import { createFocusRecovery } from "../../foundation/focus/focus-recovery"
 import { bindPanel, stateAndRenders } from "../../foundation/motion/panel"
 import { isApple } from "../../foundation/platform/platform"
@@ -671,11 +671,8 @@ function treeApiBody(
       opening ? [...expanded, key] : expanded.filter((other) => other !== key),
       why
     )
-    if (
-      changed &&
-      typeof document !== "undefined" &&
-      itemElement(key) === document.activeElement
-    ) {
+    const item = changed ? itemElement(key) : undefined
+    if (item && item === item.ownerDocument.activeElement) {
       say(opening ? "expanded" : "collapsed", key)
     }
     return changed
@@ -795,11 +792,10 @@ function treeApiBody(
   // A press on an item, or Enter: focus, selection, expanding a branch, then `onAction`.
   function press(key: string, el: HTMLElement | undefined, event?: Event) {
     const state = store.get()
-    const active =
-      typeof document === "undefined" ? null : document.activeElement
+    const active = el?.ownerDocument.activeElement
     // A text field inside the item, like a rename, keeps focus.
     const editing =
-      active instanceof HTMLElement &&
+      isInstance(active, "HTMLElement") &&
       active !== el &&
       (active.isContentEditable || active.matches("input, textarea, select"))
     if (el && active !== el && !editing) {
@@ -1142,7 +1138,7 @@ function treeApiBody(
         // The checkbox doesn't select or run the item.
         event?.preventDefault()
         const el = itemElement(key)
-        if (el && document.activeElement !== el) {
+        if (el && el.ownerDocument.activeElement !== el) {
           el.focus({ preventScroll: true })
         }
         toggleChecked(key, { reason: "item-press", event })

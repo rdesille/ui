@@ -12,19 +12,17 @@
 // others, like a submenu anchored to the item that changed, and not the popup
 // itself: moving the highlight through a menu runs no positioning frames.
 
-const wakers = new Map<() => void, Element | undefined>()
-// What `unlisten` goes back to once the last popup closes. The old one keeps
-// its aborted signal, whose reason is an error whose stack keeps the closed
-// popup, its anchor and the page around them alive. It's made out here, since
-// a function made in the cleanup would share its scope and keep them too.
-const idle = () => {}
-let unlisten = idle
+import { isInstance } from "./env"
 
-const wakeOutside = (event: Event) =>
-  wakers.forEach(
-    (popup, wake) =>
-      (event.target instanceof Node && popup?.contains(event.target)) || wake()
-  )
+const wakers = new Map<() => void, Element | undefined>()
+// A document's entry goes once its last popup closes: its aborted signal's
+// reason is an error whose stack keeps the closed popup and the page alive.
+const documents = new Map<Document, { count: number; stop: () => void }>()
+
+const wakeOutside = (event: Event) => {
+  const target = isInstance(event.target, "Node") ? event.target : null
+  wakers.forEach((popup, wake) => (target && popup?.contains(target)) || wake())
+}
 
 const wakeOnChanges = (records: MutationRecord[]) =>
   wakers.forEach(
@@ -36,7 +34,8 @@ const wakeOnChanges = (records: MutationRecord[]) =>
       ) && wake()
   )
 
-function listen() {
+function listen(doc: Document) {
+  const view = doc.defaultView
   const listening = new AbortController()
   // The capture phase, so events that don't bubble count too: element
   // scrolls, and images loading, which never reach the window.
@@ -46,7 +45,7 @@ function listen() {
     // styles, and typing through fields that grow with their text. A
     // transition starts after its delay.
     [
-      document,
+      doc,
       [
         "scroll",
         "load",
@@ -57,10 +56,10 @@ function listen() {
         "animationstart",
       ],
     ],
-    [window, ["resize"]],
+    [view, ["resize"]],
     // Pinch zoom moves the visual viewport without resizing the window.
-    [window.visualViewport, ["resize", "scroll"]],
-    [document.fonts, ["loadingdone"]],
+    [view?.visualViewport, ["resize", "scroll"]],
+    [doc.fonts, ["loadingdone"]],
   ] as const
   for (const [target, types] of targets) {
     for (const type of types) {
@@ -68,7 +67,7 @@ function listen() {
     }
   }
   const changes = new MutationObserver(wakeOnChanges)
-  changes.observe(document, {
+  changes.observe(doc, {
     subtree: true,
     childList: true,
     attributes: true,
@@ -152,9 +151,10 @@ function watchShadowRoots(shadowRoots: Node[]) {
  * open popup shares one set of listeners.
  */
 function watchMoves(wake: () => void, popup?: Element) {
-  if (!wakers.size) {
-    unlisten = listen()
-  }
+  const doc = popup?.ownerDocument ?? document
+  const listening = documents.get(doc) ?? { count: 0, stop: listen(doc) }
+  listening.count++
+  documents.set(doc, listening)
   const sizes =
     typeof ResizeObserver == "function" ? new ResizeObserver(wake) : undefined
   if (popup) {
@@ -164,11 +164,11 @@ function watchMoves(wake: () => void, popup?: Element) {
   return () => {
     sizes?.disconnect()
     wakers.delete(wake)
-    if (wakers.size) {
+    if (--listening.count) {
       return
     }
-    unlisten()
-    unlisten = idle
+    listening.stop()
+    documents.delete(doc)
   }
 }
 

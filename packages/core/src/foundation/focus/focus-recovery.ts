@@ -2,6 +2,8 @@
 // item inside a branch that collapses, or a row that's deleted, goes to a
 // part the component picks instead, so a keyboard user keeps their place.
 
+import { isInstance } from "../platform/env"
+
 /**
  * A part that left the page while it held focus.
  * @stable
@@ -42,7 +44,7 @@ function createFocusRecovery<Props = any>(options: {
 
   const innermost = (node: EventTarget | null) => {
     for (
-      let el = node instanceof Element ? node : null;
+      let el = isInstance(node, "Element") ? node : null;
       el;
       el = el.parentElement
     ) {
@@ -69,7 +71,7 @@ function createFocusRecovery<Props = any>(options: {
           if (
             holder === el &&
             el.isConnected &&
-            !el.contains(document.activeElement)
+            !el.contains(el.ownerDocument.activeElement)
           ) {
             holder = null
           }
@@ -80,11 +82,11 @@ function createFocusRecovery<Props = any>(options: {
         el.removeEventListener("focusin", focusin)
         el.removeEventListener("focusout", focusout)
         bound.delete(el)
-        const active =
-          typeof document === "undefined" ? null : document.activeElement
+        const doc = el.ownerDocument
+        const active = doc.activeElement
         const held =
           el.contains(active) ||
-          (holder === el && (!active || active === document.body))
+          (holder === el && (!active || active === doc.body))
         if (holder === el) {
           holder = null
         }
@@ -93,14 +95,9 @@ function createFocusRecovery<Props = any>(options: {
         }
         const lost = { key: part.key, props: part.props, el }
         queueMicrotask(() => {
-          const now = document.activeElement
+          const now = doc.activeElement
           // Something else took focus meanwhile, like a dialog the removal opened.
-          if (
-            now &&
-            now !== document.body &&
-            now.isConnected &&
-            !el.contains(now)
-          ) {
+          if (now && now !== doc.body && now.isConnected && !el.contains(now)) {
             return
           }
           const target = options.fallback(lost)

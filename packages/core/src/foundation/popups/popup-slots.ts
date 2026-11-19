@@ -6,6 +6,7 @@ import { dev } from "#dev"
 import { checkName } from "#name-check"
 import { flagWhileBound, settleFlag } from "../kernel/bound-keys"
 import { openAttrs } from "../kernel/attrs"
+import { trackInput } from "../kernel/modality"
 import { onProps } from "../kernel/part"
 import type { Part, SlotFactory } from "../kernel/primitive-types"
 import type { Store } from "../kernel/store"
@@ -268,6 +269,7 @@ function popupTrigger<State extends PopupState, Api extends PopupApi>(
       if (dev) {
         checkName(el, "The trigger", { component: api.internal.label, id })
       }
+      trackInput(el.ownerDocument)
       return bindTrigger(store, key)
     },
   })

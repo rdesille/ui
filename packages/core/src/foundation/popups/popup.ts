@@ -388,8 +388,8 @@ function readCaret(selection: Selection) {
   return { range, backward }
 }
 
-function focusIsLost() {
-  const active = activeElement()
+function focusIsLost(doc?: Document) {
+  const active = activeElement(doc)
   return (
     !active ||
     active === active.ownerDocument.body ||
@@ -635,6 +635,9 @@ function createPopupLayer<
     previous: Element | null
   }[] = []
   const returnTrigger = options.returnTrigger ?? options.trigger
+  // The popup's window may not be this script's, like one the app opened.
+  const currentFocus = () =>
+    activeElement((shown?.el ?? bound?.el ?? options.trigger())?.ownerDocument)
   let place: (() => void) | undefined
   let checkPlacement: (() => void) | undefined
   let remodal: (() => void) | undefined
@@ -690,7 +693,7 @@ function createPopupLayer<
       focusPending = true
       enterPending = true
       returnMode = true
-      const active = isBrowser ? activeElement() : null
+      const active = isBrowser ? currentFocus() : null
       openedFrom(
         active && active !== active.ownerDocument.body ? active : undefined
       )
@@ -744,7 +747,7 @@ function createPopupLayer<
     // Focus on the body belongs to no one, like in Safari, where pressing a
     // button doesn't focus it. Focus in a popup nested under this one counts as
     // inside, and so does focus in a shadow root inside it.
-    const active = activeElement()
+    const active = activeElement(el.ownerDocument)
     const trigger = options.trigger()
     const hadFocus =
       !active ||
@@ -788,12 +791,12 @@ function createPopupLayer<
       returnFocus(el, from, false, range)
       // What focus went back to can leave as the framework renders the close,
       // like the row a confirm dialog's action removes. The chain goes on then.
-      const target = activeElement()
+      const target = activeElement(el.ownerDocument)
       setTimeout(() => {
         if (
           target &&
           !target.isConnected &&
-          focusIsLost() &&
+          focusIsLost(el.ownerDocument) &&
           !openedSince(order)
         ) {
           returnFocus(el, from)
@@ -803,7 +806,7 @@ function createPopupLayer<
     }
     if (mode === "unless-moved") {
       queueMicrotask(() => {
-        const now = activeElement()
+        const now = activeElement(el.ownerDocument)
         const moved =
           !!now && now !== el.ownerDocument.body && !composedContains(el, now)
         if (!moved && !openedSince(order)) {
@@ -816,13 +819,20 @@ function createPopupLayer<
       off()
       clearTimeout(fallback)
       setTimeout(() => {
-        const active = activeElement()
+        const active = activeElement(el.ownerDocument)
         if (!active || active === el.ownerDocument.body) {
           returnFocus(el, from, false, range)
         }
       })
     }
-    const off = on(window, "pointerup", settle, { capture: true })
+    const off = on(
+      el.ownerDocument.defaultView ?? window,
+      "pointerup",
+      settle,
+      {
+        capture: true,
+      }
+    )
     const fallback = setTimeout(settle, 1000)
   })
 
@@ -956,7 +966,7 @@ function createPopupLayer<
             : range
           : undefined
       restoreFocus(target)
-      if (activeElement() !== target) {
+      if (activeElement(target.ownerDocument) !== target) {
         return false
       }
       if (kept && target.contains(kept.range.startContainer)) {
@@ -1012,7 +1022,7 @@ function createPopupLayer<
     if (openedOnPress) {
       // The pointer can reach an item before the frame, which focuses it.
       requestAnimationFrame(() => {
-        const active = activeElement()
+        const active = currentFocus()
         if (!shown || !active || !composedContains(shown.el, active)) {
           run()
         }
@@ -1029,7 +1039,7 @@ function createPopupLayer<
     // Mounted open, like a dialog a menu item opens, focus returns to what
     // had it as the popup mounted, since no open recorded it.
     if (opener === "initial" && !before) {
-      const active = activeElement()
+      const active = activeElement(el.ownerDocument)
       openedFrom(
         active &&
           active !== active.ownerDocument.body &&
@@ -1082,7 +1092,7 @@ function createPopupLayer<
           : undefined
       )
     )
-    trackInput()
+    trackInput(el.ownerDocument)
 
     let modal = options.modal()
     const blur = behavior.blur
@@ -1182,7 +1192,7 @@ function createPopupLayer<
       inside: (outer) =>
         outer.contains(el) || (!!trigger && outer.contains(trigger)),
       again: () => {
-        const focused = activeElement()
+        const focused = currentFocus()
         hide()
         for (const part of [host, backdrop]) {
           try {
@@ -1190,7 +1200,7 @@ function createPopupLayer<
           } catch {}
         }
         show()
-        if (focused && focused !== activeElement()) {
+        if (focused && focused !== currentFocus()) {
           ;(focused as HTMLElement).focus({ preventScroll: true })
         }
       },
@@ -1247,7 +1257,7 @@ function createPopupLayer<
         if (!store.get().open) {
           return
         }
-        const focused = activeElement()
+        const focused = currentFocus()
         freezePage()
         // Focus that rested on the page, inert now, moves in.
         if (
@@ -1363,7 +1373,7 @@ function createPopupLayer<
       store.get().open &&
       !focusPending &&
       tabMode() === "trap" &&
-      focusIsLost()
+      focusIsLost(el.ownerDocument)
     ) {
       focusPending = true
     }
@@ -1456,7 +1466,7 @@ function createPopupLayer<
     const stops = composedTabbables(popup)
     const first = stops[0]
     const last = stops.at(-1)
-    const active = activeElement()
+    const active = currentFocus()
     const atStart = !first || active === first || active === popup
     const atEnd = !last || active === last
     // The browser visits every positive tabindex in the page before the rest,
@@ -1562,7 +1572,7 @@ function createPopupLayer<
         bound = undefined
         if (shown?.el === el) {
           // Some frameworks remove the element first, and its focus is on the body by now.
-          const active = activeElement()
+          const active = currentFocus()
           const held =
             store.get().open &&
             behavior.movesFocus &&
@@ -1578,7 +1588,7 @@ function createPopupLayer<
             const range = caret
             caret = undefined
             queueMicrotask(() => {
-              if (!bound && !el.isConnected && focusIsLost()) {
+              if (!bound && !el.isConnected && focusIsLost(el.ownerDocument)) {
                 returnFocus(el, from, true, range, setting)
               }
             })
@@ -1652,7 +1662,7 @@ function createPopupLayer<
       const inline = !!bound?.config.inline
       shown.backdrop = backdrop
       const stop = showBackdrop(backdrop, inline)
-      const active = activeElement()
+      const active = currentFocus()
       if (!inline) {
         try {
           host.hidePopover()
@@ -1660,7 +1670,7 @@ function createPopupLayer<
         } catch {}
       }
       // Hiding sends focus back to where it was before. Put it back.
-      if (active && active !== activeElement()) {
+      if (active && active !== currentFocus()) {
         active.focus({ preventScroll: true })
       }
       const release = layer?.keep?.(backdrop)

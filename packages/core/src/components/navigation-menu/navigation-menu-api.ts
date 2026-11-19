@@ -352,7 +352,8 @@ function navigationMenuApiBody(
     closeDelay: () => options().closeDelay ?? 50,
     close(event) {
       // Someone working inside the panel keeps it open.
-      if (surface().element()?.contains(document.activeElement)) {
+      const panel = surface().element()
+      if (panel?.contains(panel.ownerDocument.activeElement)) {
         return
       }
       close({ reason: "trigger-hover", event, focus: false })
@@ -758,7 +759,7 @@ function navigationMenuApiBody(
         stopAnimation()
         // Content animating out is inert. Focus inside it goes back to its trigger.
         const trigger = triggerOf(key)
-        if (el.contains(document.activeElement) && trigger) {
+        if (el.contains(el.ownerDocument.activeElement) && trigger) {
           restoreFocus(trigger)
         }
         // Ahead of the render, for exit keyframes keyed on the state.

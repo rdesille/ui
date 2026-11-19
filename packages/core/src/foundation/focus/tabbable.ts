@@ -1,4 +1,5 @@
 import { isAfter } from "../kernel/order"
+import { isInstance } from "../platform/env"
 
 const candidates = [
   "a[href]",
@@ -16,7 +17,7 @@ const candidates = [
 ].join(",")
 
 function isTabbable(el: Element): el is HTMLElement {
-  if (!(el instanceof HTMLElement) || el.tabIndex < 0) {
+  if (!isInstance(el, "HTMLElement") || el.tabIndex < 0) {
     return false
   }
   if (el.matches(":disabled") || el.closest("[inert]")) {
@@ -39,7 +40,7 @@ function isTabbable(el: Element): el is HTMLElement {
 }
 
 function radioGroup(el: Element) {
-  if (!(el instanceof HTMLInputElement) || el.type !== "radio" || !el.name) {
+  if (!isInstance(el, "HTMLInputElement") || el.type !== "radio" || !el.name) {
     return []
   }
   const scope = el.form
@@ -51,7 +52,7 @@ function radioGroup(el: Element) {
       )
   return scope.filter(
     (radio): radio is HTMLInputElement =>
-      radio instanceof HTMLInputElement &&
+      isInstance(radio, "HTMLInputElement") &&
       radio.type === "radio" &&
       radio.name === el.name &&
       radio.form === el.form
@@ -88,7 +89,9 @@ function composedTabbables(root: ParentNode) {
         isTabbable(el)
           ? [el]
           : []
-      const slotted = el instanceof HTMLSlotElement ? el.assignedElements() : []
+      const slotted = isInstance(el, "HTMLSlotElement")
+        ? el.assignedElements()
+        : []
       if (el.shadowRoot || slotted.length) {
         const inner: Entry[] = []
         walk(el.shadowRoot?.children ?? slotted, inner)
@@ -151,7 +154,7 @@ function takesFocus(node: Element, root: Element) {
 }
 
 function holdsFocusableNode(node: Node, root: Element) {
-  if (!(node instanceof Element)) {
+  if (!isInstance(node, "Element")) {
     return false
   }
   return (
